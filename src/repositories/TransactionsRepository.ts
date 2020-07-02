@@ -23,23 +23,23 @@ class TransactionsRepository {
     return this.transactions;
   }
 
+  getIncomes = (acc: number, obj: Transaction): number => {
+    if (obj.type === 'income') {
+      acc += obj.value;
+    }
+    return acc;
+  };
+
+  getOutcomes = (acc: number, obj: Transaction): number => {
+    if (obj.type === 'outcome') {
+      acc += obj.value;
+    }
+    return acc;
+  };
+
   public getBalance(): Balance {
-    const { income, outcome } = this.transactions.reduce(
-      (accumulator: Balance, transaction: Transaction) => {
-        if (transaction.type === 'income') {
-          accumulator.income += transaction.value;
-        }
-        if (transaction.type === 'outcome') {
-          accumulator.outcome += transaction.value;
-        }
-        return accumulator;
-      },
-      {
-        income: 0,
-        outcome: 0,
-        total: 0,
-      },
-    );
+    const income = this.transactions.reduce(this.getIncomes, 0);
+    const outcome = this.transactions.reduce(this.getOutcomes, 0);
     const total = income - outcome;
     return { income, outcome, total };
   }
