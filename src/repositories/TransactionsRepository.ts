@@ -23,22 +23,20 @@ class TransactionsRepository {
     return this.transactions;
   }
 
+  getTotalizadores = (acc: Balance, obj: Transaction): Balance => {
+    if (obj.type === 'income') {
+      acc.income += obj.value;
+    }
+    if (obj.type === 'outcome') {
+      acc.outcome += obj.value;
+    }
+    return acc;
+  };
+
   public getBalance(): Balance {
     const { income, outcome } = this.transactions.reduce(
-      (accumulator: Balance, transaction: Transaction) => {
-        if (transaction.type === 'income') {
-          accumulator.income += transaction.value;
-        }
-        if (transaction.type === 'outcome') {
-          accumulator.outcome += transaction.value;
-        }
-        return accumulator;
-      },
-      {
-        income: 0,
-        outcome: 0,
-        total: 0,
-      },
+      this.getTotalizadores,
+      { income: 0, outcome: 0, total: 0 },
     );
     const total = income - outcome;
     return { income, outcome, total };
@@ -47,7 +45,7 @@ class TransactionsRepository {
   public create({ title, value, type }: TransactionDTO): Transaction {
     const transaction = new Transaction({ title, value, type });
     const balance = this.getBalance();
-    if (transaction.type == 'outcome' && balance.total < transaction.value) {
+    if (transaction.type === 'outcome' && balance.total < transaction.value) {
       throw Error('Saldo Insuficiente, mané!');
     }
     this.transactions.push(transaction);
